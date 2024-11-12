@@ -1,0 +1,39 @@
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  background-color: #f4f4f9;
+  color: #333;
+}
+
+#app {
+  max-width: 800px;
+  width: 100%;
+  padding: 20px;
+}
+
+#silos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.silo {
+  padding: 20px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.silo-status {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.silo-status.ok {
+  color: green;
+}
+
+.silo-status.alert {
+  color: red;
+}
