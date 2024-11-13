@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Silo Management System</title>
+  <style>
+    /* Basic styling for silo containers */
+    #silo-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .silo {
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      width: 200px;
+      text-align: center;
+      transition: background-color 0.3s ease;
+    }
+
+    /* Styling for specific text color states */
+    .text-green {
+      color: #00cc00; /* Green for normal capacity */
+    }
+    .text-orange {
+      color: #fe810d; /* Orange for moderate levels */
+    }
+    .text-red {
+      color: #ff0000; /* Red for high/critical levels */
+    }
+    .text-blue {
+      color: #0000ff; /* Blue for low temperature */
+    }
+
+    /* Background color based on overall silo condition */
+    .bg-green {
+      background-color: #b2efb2; /* Lighter green for good conditions */
+    }
+    .bg-orange {
+      background-color: #ffe0b3; /* Lighter orange for moderate conditions */
+    }
+    .bg-red {
+      background-color: #ffcccc; /* Lighter red for critical conditions */
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Silo Management System</h1>
+  <div id="silo-container"></div>
+
+  <script>
+    // Fetch silo data from the backend API
+    fetch('http://localhost:3000/api/silos')
+      .then(response => response.json())
+      .then(data => {
+        const siloContainer = document.getElementById('silo-container');
+        siloContainer.innerHTML = ''; // Clear any existing content
+
+        data.forEach(silo => {
+          const siloElement = document.createElement('div');
+          siloElement.classList.add('silo');
+
+          // Determine text color classes for capacity
+          let capacityClass;
+          if (silo.currentLevel >= silo.capacity) {
+            capacityClass = 'text-red';
+          } else if (silo.currentLevel >= silo.capacity * 0.85) {
+            capacityClass = 'text-orange';
+          } else {
+            capacityClass = 'text-green';
+          }
+
+          // Determine text color classes for temperature
+          let temperatureClass;
+          if (silo.temperature >= 33) {
+            temperatureClass = 'text-red';
+          } else if (silo.temperature >= 28) {
+            temperatureClass = 'text-orange';
+          } else if (silo.temperature <= 20) {
+            temperatureClass = 'text-blue';
+          } else {
+            temperatureClass = 'text-green';
+          }
+
+          // Determine text color classes for humidity
+          let humidityClass;
+          if (silo.humidity >= 70 || silo.humidity <= 30) {
+            humidityClass = 'text-red';
+          } else if (silo.humidity >= 60 || silo.humidity <= 40) {
+            humidityClass = 'text-orange';
+          } else {
+            humidityClass = 'text-green';
+          }
+
+          // Determine overall background color class based on all criteria
+          let bgColorClass;
+          if (capacityClass === 'text-red' && temperatureClass === 'text-red' && humidityClass === 'text-red') {
+            bgColorClass = 'bg-red'; // All criteria are in red
+          } else if (capacityClass === 'text-orange' || temperatureClass === 'text-orange' || humidityClass === 'text-orange') {
+            bgColorClass = 'bg-orange'; // At least one criterion is in orange
+          } else {
+            bgColorClass = 'bg-green'; // All criteria are good (green)
+          }
+
+          // Insert HTML with conditional classes for text colors and background
+          siloElement.classList.add(bgColorClass); // Add the background color class
+
+          siloElement.innerHTML = `
+            <h3>${silo.name}</h3>
+            <p>Capacity: ${silo.capacity}</p>
+            <p>Current Level: <span class="${capacityClass}">${silo.currentLevel}</span></p>
+            <p>Humidity: <span class="${humidityClass}">${silo.humidity}%</span></p>
+            <p>Temperature: <span class="${temperatureClass}">${silo.temperature}°C</span></p>
+          `;
+
+          siloContainer.appendChild(siloElement);
+        });
+      })
+      .catch(error => {
+        console.error("Error fetching silo data:", error);
+      });
+  </script>
+
+</body>
+</html>

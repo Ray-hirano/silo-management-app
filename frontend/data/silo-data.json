@@ -1,0 +1,27 @@
+[
+    {
+      "id": 1,
+      "name": "Silo 1",
+      "capacity": 100,
+      "currentLevel": 50,
+      "humidity": 45,
+      "temperature": 22
+    },
+    {
+      "id": 2,
+      "name": "Silo 2",
+      "capacity": 200,
+      "currentLevel": 150,
+      "humidity": 40,
+      "temperature": 25
+    },
+    {
+      "id": 3,
+      "name": "Silo 3",
+      "capacity": 150,
+      "currentLevel": 130,
+      "humidity": 55,
+      "temperature": 20
+    }
+  ]
+  

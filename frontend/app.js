@@ -1,76 +1,119 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json()); // Parses JSON request bodies
 
-// Sample data structure for silos
-let silos = [
-  { id: 1, name: 'Silo 1', capacity: 100, currentLevel: 100 },
-  { id: 2, name: 'Silo 2', capacity: 200, currentLevel: 150 },
-  { id: 3, name: 'Silo 3', capacity: 200, currentLevel: 170 },
-  { id: 4, name: 'Silo 4', capacity: 500, currentLevel: 600 },
-  { id: 5, name: 'Silo 5', capacity: 500, currentLevel: 490 }
-];
+// Route to serve the static HTML and JavaScript files for the frontend
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Helper function to calculate silo status
-function getSiloStatus(silo) {
-  if (silo.currentLevel > silo.capacity) {
-    return 'over-capacity';
-  } else if (silo.currentLevel < silo.capacity * 0.2) {
-    return 'low-capacity';
-  } else {
-    return 'normal-capacity';
-  }
-}
-
-// GET route for /api/silos
+// Endpoint to get silo data from JSON file
 app.get('/api/silos', (req, res) => {
-  const siloStatuses = silos.map(silo => {
-    return {
-      ...silo,
-      status: getSiloStatus(silo) // Add status based on currentLevel
-    };
+  fs.readFile(path.join(__dirname, 'silo-data.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error("Error reading JSON file:", err);
+      return res.status(500).json({ error: "Failed to load silo data" });
+    }
+    const silos = JSON.parse(data);
+    res.json(silos);
   });
-
-  res.json(siloStatuses);
 });
 
-// Add a new silo
+// Endpoint to add a new silo entry
 app.post('/api/silos', (req, res) => {
-  const newSilo = {
-    id: silos.length + 1,
-    name: req.body.name,
-    capacity: req.body.capacity,
-    currentLevel: req.body.currentLevel
-  };
-  silos.push(newSilo);
-  res.status(201).json(newSilo);
+  fs.readFile(path.join(__dirname, 'silo-data.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error("Error reading JSON file:", err);
+      return res.status(500).json({ error: "Failed to load silo data" });
+    }
+    
+    const silos = JSON.parse(data);
+    const newSilo = {
+      id: silos.length + 1,
+      name: req.body.name,
+      capacity: req.body.capacity,
+      currentLevel: req.body.currentLevel,
+      humidity: req.body.humidity,
+      temperature: req.body.temperature
+    };
+    silos.push(newSilo);
+
+    // Write updated data back to JSON file
+    fs.writeFile(path.join(__dirname, 'silo-data.json'), JSON.stringify(silos, null, 2), (writeErr) => {
+      if (writeErr) {
+        console.error("Error writing JSON file:", writeErr);
+        return res.status(500).json({ error: "Failed to save new silo data" });
+      }
+      res.status(201).json(newSilo);
+    });
+  });
 });
 
-// Update a specific silo
+// Endpoint to update an existing silo entry by ID
 app.put('/api/silos/:id', (req, res) => {
   const siloId = parseInt(req.params.id);
-  const silo = silos.find(s => s.id === siloId);
-  if (!silo) return res.status(404).send("Silo not found");
 
-  silo.name = req.body.name;
-  silo.capacity = req.body.capacity;
-  silo.currentLevel = req.body.currentLevel;
+  fs.readFile(path.join(__dirname, 'silo-data.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error("Error reading JSON file:", err);
+      return res.status(500).json({ error: "Failed to load silo data" });
+    }
+    
+    const silos = JSON.parse(data);
+    const siloIndex = silos.findIndex(s => s.id === siloId);
 
-  res.json(silo);
+    if (siloIndex === -1) {
+      return res.status(404).json({ error: "Silo not found" });
+    }
+
+    // Update the silo data
+    silos[siloIndex] = { ...silos[siloIndex], ...req.body };
+
+    // Write updated data back to JSON file
+    fs.writeFile(path.join(__dirname, 'silo-data.json'), JSON.stringify(silos, null, 2), (writeErr) => {
+      if (writeErr) {
+        console.error("Error writing JSON file:", writeErr);
+        return res.status(500).json({ error: "Failed to update silo data" });
+      }
+      res.json(silos[siloIndex]);
+    });
+  });
 });
 
-// Delete a specific silo
+// Endpoint to delete a silo by ID
 app.delete('/api/silos/:id', (req, res) => {
   const siloId = parseInt(req.params.id);
-  const siloIndex = silos.findIndex(s => s.id === siloId);
-  if (siloIndex === -1) return res.status(404).send("Silo not found");
 
-  const removedSilo = silos.splice(siloIndex, 1);
-  res.json(removedSilo);
+  fs.readFile(path.join(__dirname, 'silo-data.json'), 'utf8', (err, data) => {
+    if (err) {
+      console.error("Error reading JSON file:", err);
+      return res.status(500).json({ error: "Failed to load silo data" });
+    }
+
+    const silos = JSON.parse(data);
+    const siloIndex = silos.findIndex(s => s.id === siloId);
+
+    if (siloIndex === -1) {
+      return res.status(404).json({ error: "Silo not found" });
+    }
+
+    // Remove the silo from the array
+    const removedSilo = silos.splice(siloIndex, 1);
+
+    // Write updated data back to JSON file
+    fs.writeFile(path.join(__dirname, 'silo-data.json'), JSON.stringify(silos, null, 2), (writeErr) => {
+      if (writeErr) {
+        console.error("Error writing JSON file:", writeErr);
+        return res.status(500).json({ error: "Failed to delete silo data" });
+      }
+      res.json(removedSilo);
+    });
+  });
 });
 
 app.listen(PORT, () => {
