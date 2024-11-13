@@ -1,24 +1,27 @@
-const silos = [
-    { id: 1, name: 'Silo 1', level: 60, status: 'ok' },
-    { id: 2, name: 'Silo 2', level: 25, status: 'alert' },
-    { id: 3, name: 'Silo 3', level: 75, status: 'ok' },
-  ];
-  
-  function displaySilos() {
-    const silosContainer = document.getElementById('silos');
-    silosContainer.innerHTML = ''; // Clear previous entries
-  
-    silos.forEach((silo) => {
-      const siloDiv = document.createElement('div');
-      siloDiv.classList.add('silo');
-      siloDiv.innerHTML = `
-        <h2>${silo.name}</h2>
-        <p>Level: ${silo.level}%</p>
-        <p class="silo-status ${silo.status}">${silo.status === 'ok' ? 'Normal' : 'Alert'}</p>
+// Fetch silo data from the backend and render it on the page
+fetch('http://localhost:3000/api/silos')
+  .then(response => response.json())  // Parse JSON response
+  .then(data => {
+    const siloContainer = document.getElementById('silo-container');
+    siloContainer.innerHTML = ''; // Clear any existing content in the container
+
+    // Iterate over each silo in the data and create HTML elements for them
+    data.forEach(silo => {
+      const siloElement = document.createElement('div');
+      siloElement.classList.add('silo'); // Add a basic silo class
+      siloElement.classList.add(silo.status); // Add status-based class (normal, nearCapacity, or overCapacity)
+
+      // Add the silo data (name, capacity, current level) to the silo element
+      siloElement.innerHTML = `
+        <h3>${silo.name}</h3>
+        <p>Capacity: ${silo.capacity}</p>
+        <p>Current Level: ${silo.currentLevel}</p>
       `;
-      silosContainer.appendChild(siloDiv);
+
+      // Append the silo element to the container
+      siloContainer.appendChild(siloElement);
     });
-  }
-  
-  document.addEventListener('DOMContentLoaded', displaySilos);
-  
+  })
+  .catch(error => {
+    console.error("Error fetching silo data:", error);
+  });
