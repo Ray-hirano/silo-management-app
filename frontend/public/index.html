@@ -19,6 +19,7 @@
       padding: 15px;
       width: 200px;
       text-align: center;
+      cursor: pointer; /* Add cursor to indicate it can be clicked */
       transition: background-color 0.3s ease;
     }
 
@@ -27,7 +28,7 @@
       color: #00cc00; /* Green for normal capacity */
     }
     .text-orange {
-      color: #fe810d; /* Orange for moderate levels */
+      color: #ffa500; /* Orange for moderate levels */
     }
     .text-red {
       color: #ff0000; /* Red for high/critical levels */
@@ -36,9 +37,9 @@
       color: #0000ff; /* Blue for low temperature */
     }
 
-    /* Background color based on overall silo condition */
+    /* Lighter background color based on overall silo condition */
     .bg-green {
-      background-color: #b2efb2; /* Lighter green for good conditions */
+      background-color: #e0f7e0; /* Lighter green for good conditions */
     }
     .bg-orange {
       background-color: #ffe0b3; /* Lighter orange for moderate conditions */
@@ -46,12 +47,64 @@
     .bg-red {
       background-color: #ffcccc; /* Lighter red for critical conditions */
     }
+
+    /* Modal Styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 1; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto; /* Enable scrolling if needed */
+      background-color: rgb(0, 0, 0); /* Fallback color */
+      background-color: rgba(0, 0, 0, 0.4); /* Black with transparency */
+      padding-top: 60px;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
   <h1>Silo Management System</h1>
   <div id="silo-container"></div>
+
+  <!-- Modal for detailed silo data -->
+  <div id="silo-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2 id="modal-title"></h2>
+      <p><strong>Capacity:</strong> <span id="modal-capacity"></span></p>
+      <p><strong>Current Level:</strong> <span id="modal-currentLevel"></span></p>
+      <p><strong>Humidity:</strong> <span id="modal-humidity"></span></p>
+      <p><strong>Temperature:</strong> <span id="modal-temperature"></span></p>
+      <div id="modal-historical"></div>
+      <div id="modal-trend"></div>
+    </div>
+  </div>
+  
 
   <script>
     // Fetch silo data from the backend API
@@ -64,6 +117,7 @@
         data.forEach(silo => {
           const siloElement = document.createElement('div');
           siloElement.classList.add('silo');
+          siloElement.setAttribute('data-id', silo.id); // Store silo id for reference
 
           // Determine text color classes for capacity
           let capacityClass;
@@ -118,12 +172,43 @@
             <p>Temperature: <span class="${temperatureClass}">${silo.temperature}°C</span></p>
           `;
 
+          // Add click event listener to show the modal
+          siloElement.addEventListener('click', () => showModal(silo));
+
           siloContainer.appendChild(siloElement);
         });
       })
       .catch(error => {
         console.error("Error fetching silo data:", error);
       });
+
+    // Show the modal with detailed silo information
+    function showModal(silo) {
+      const modal = document.getElementById("silo-modal");
+      const closeBtn = document.querySelector(".close");
+      
+      document.getElementById("modal-title").innerText = silo.name;
+      document.getElementById("modal-capacity").innerText = silo.capacity;
+      document.getElementById("modal-currentLevel").innerText = silo.currentLevel;
+      document.getElementById("modal-humidity").innerText = silo.humidity + '%';
+      document.getElementById("modal-temperature").innerText = silo.temperature + '°C';
+      document.getElementById("modal-historical").innerText = silo.historicalData;
+      document.getElementById("modal-trend").innerText = silo.trend; 
+
+      modal.style.display = "block";
+
+      // Close the modal when the user clicks on the close button
+      closeBtn.onclick = () => {
+        modal.style.display = "none";
+      }
+
+      // Close the modal if the user clicks outside of it
+      window.onclick = (event) => {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      }
+    }
   </script>
 
 </body>
