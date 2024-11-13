@@ -247,18 +247,17 @@
       modal.style.display = "block";
     }
 
-    // Display the historical record data
+    // Display the historical data for a selected record
     function displayHistoricalData(record) {
-      const historicalDisplay = document.getElementById('modal-historical');
-      historicalDisplay.innerHTML = `
-        <h3>Historical Record - ${record.date}</h3>
-        <p><strong>Capacity:</strong> ${record.capacity}</p>
-        <p><strong>Level:</strong> ${record.level}</p>
-        <p><strong>Humidity:</strong> ${record.humidity}%</p>
-        <p><strong>Temperature:</strong> ${record.temperature}°C</p>
+      const historicalDataDiv = document.getElementById('modal-historical');
+      historicalDataDiv.innerHTML = `
+        <h3>Historical Data for ${record.date}</h3>
+        <p>Temperature: ${record.temperature}°C</p>
+        <p>Humidity: ${record.humidity}%</p>
+        <p>Capacity: ${record.capacity}</p>
+        <p>Level: ${record.level}</p>
       `;
     }
   </script>
-
 </body>
 </html>
