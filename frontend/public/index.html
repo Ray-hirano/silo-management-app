@@ -84,6 +84,29 @@
       text-decoration: none;
       cursor: pointer;
     }
+
+    .historical-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .historical-button {
+      padding: 10px;
+      border: 1px solid #888;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .historical-button:hover {
+      background-color: #ddd;
+    }
+
+    .historical-data {
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
@@ -100,8 +123,12 @@
       <p><strong>Current Level:</strong> <span id="modal-currentLevel"></span></p>
       <p><strong>Humidity:</strong> <span id="modal-humidity"></span></p>
       <p><strong>Temperature:</strong> <span id="modal-temperature"></span></p>
-      <div id="modal-historical"></div>
-      <div id="modal-trend"></div>
+
+      <!-- Historical Data Buttons -->
+      <div id="historical-buttons" class="historical-buttons"></div>
+
+      <!-- Historical Data Display -->
+      <div id="modal-historical" class="historical-data"></div>
     </div>
   </div>
   
@@ -192,10 +219,18 @@
       document.getElementById("modal-currentLevel").innerText = silo.currentLevel;
       document.getElementById("modal-humidity").innerText = silo.humidity + '%';
       document.getElementById("modal-temperature").innerText = silo.temperature + '°C';
-      document.getElementById("modal-historical").innerText = silo.historicalData;
-      document.getElementById("modal-trend").innerText = silo.trend; 
-
       modal.style.display = "block";
+      
+      // Create historical data buttons dynamically
+      const historicalButtons = document.getElementById('historical-buttons');
+      historicalButtons.innerHTML = ''; // Clear previous buttons
+      silo.historicalData.forEach(record => {
+        const button = document.createElement('button');
+        button.classList.add('historical-button');
+        button.innerText = record.date;
+        button.onclick = () => displayHistoricalData(record);
+        historicalButtons.appendChild(button);
+      });
 
       // Close the modal when the user clicks on the close button
       closeBtn.onclick = () => {
@@ -208,6 +243,20 @@
           modal.style.display = "none";
         }
       }
+
+      modal.style.display = "block";
+    }
+
+    // Display the historical record data
+    function displayHistoricalData(record) {
+      const historicalDisplay = document.getElementById('modal-historical');
+      historicalDisplay.innerHTML = `
+        <h3>Historical Record - ${record.date}</h3>
+        <p><strong>Capacity:</strong> ${record.capacity}</p>
+        <p><strong>Level:</strong> ${record.level}</p>
+        <p><strong>Humidity:</strong> ${record.humidity}%</p>
+        <p><strong>Temperature:</strong> ${record.temperature}°C</p>
+      `;
     }
   </script>
 
