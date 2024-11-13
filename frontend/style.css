@@ -15,7 +15,7 @@
 }
 
 .silo.nearCapacity {
-  background-color: yellow;  /* Near capacity */
+  background-color: orange;  /* Near capacity */
 }
 
 .silo.overCapacity {
