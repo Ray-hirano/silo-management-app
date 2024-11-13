@@ -8,14 +8,29 @@ app.use(cors());
 
 // Sample data structure for silos
 let silos = [
-  { id: 1, name: 'Silo 1', capacity: 100, currentLevel: 50 },
+  { id: 1, name: 'Silo 1', capacity: 100, currentLevel: 100 },
   { id: 2, name: 'Silo 2', capacity: 200, currentLevel: 150 },
+  { id: 3, name: 'Silo 3', capacity: 200, currentLevel: 170 },
+  { id: 3, name: 'Silo 4', capacity: 500, currentLevel: 600 },
 ];
 
-// Get all silos
+// GET route for /api/silos
 app.get('/api/silos', (req, res) => {
-  res.json(silos);
+  const siloStatuses = silos.map(silo => {
+    let status = 'normal'; // Default status is normal
+
+    if (silo.currentLevel >= silo.capacity) {
+      status = 'overCapacity'; // Over capacity if currentLevel is greater than capacity
+    } else if (silo.currentLevel >= silo.capacity * 0.1) {
+      status = 'nearCapacity';
+    }  
+    return { ...silo, status }; // Add the status property to each silo
+  });
+
+  res.json(siloStatuses);
 });
+
+
 
 // Add a new silo
 app.post('/api/silos', (req, res) => {
@@ -56,3 +71,4 @@ app.delete('/api/silos/:id', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
